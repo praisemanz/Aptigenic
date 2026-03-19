@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Started — Aptigenic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="onboard-page">
+    <nav>
+        <a href="{{ url_for('welcome') }}" class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Aptigenic" class="logo-img">
+        </a>
+        <div class="nav-right">
+            <a href="{{ url_for('welcome') }}" class="nav-btn nav-btn-outline">&#8592; Home</a>
+            <label class="theme-toggle" title="Toggle dark mode">
+                <input type="checkbox" id="dark-mode-toggle">
+                <span class="toggle-track">
+                    <span class="toggle-sun">&#9788;</span>
+                    <span class="toggle-moon">&#9790;</span>
+                    <span class="toggle-thumb"></span>
+                </span>
+            </label>
+        </div>
+    </nav>
+
+    <main class="onboard-container">
+        <div class="onboard-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <span class="progress-text" id="progress-text">Step 1 of 4</span>
+        </div>
+
+        <!-- Step 1: Resume -->
+        <div class="onboard-step active" data-step="1">
+            <div class="step-header">
+                <span class="step-number">01</span>
+                <h2>Upload your resume or describe your background</h2>
+                <p>Upload a file or paste text below. The more detail, the better Aptigenic can map your career.</p>
+            </div>
+
+            <div class="upload-zone" id="upload-zone">
+                <div class="upload-icon">&#128196;</div>
+                <p class="upload-label">Drop a file here or click to browse</p>
+                <p class="upload-hint">PDF, DOCX, or TXT — max 10 MB</p>
+                <input type="file" id="resume-file" accept=".pdf,.docx,.doc,.txt" hidden>
+            </div>
+            <div class="upload-status" id="upload-status" style="display:none;">
+                <span class="upload-filename" id="upload-filename"></span>
+                <button class="upload-remove" id="upload-remove">&times;</button>
+            </div>
+
+            <div class="or-divider"><span>or paste text</span></div>
+
+            <textarea id="resume" class="onboard-textarea" rows="10"
+                placeholder="Paste your resume here, or write a summary of your work experience, education, and skills...">{{ user.resume_text or '' }}</textarea>
+        </div>
+
+        <!-- Step 2: Target -->
+        <div class="onboard-step" data-step="2">
+            <div class="step-header">
+                <span class="step-number">02</span>
+                <h2>What's your dream role or career direction?</h2>
+                <p>Be as specific or broad as you want. "AI Engineer", "something in healthcare", or "I have no idea" are all valid.</p>
+            </div>
+            <input type="text" id="target_role" class="onboard-input"
+                placeholder="e.g., Senior Product Manager, Data Scientist, or 'I'm exploring options'"
+                value="{{ user.target_role or '' }}">
+            <div class="step-header" style="margin-top: 32px;">
+                <h3>What are you passionate about?</h3>
+                <p>Interests outside work matter too — they reveal hidden career fits.</p>
+            </div>
+            <input type="text" id="interests" class="onboard-input"
+                placeholder="e.g., writing, problem-solving, working with people, building things"
+                value="{{ user.interests or '' }}">
+        </div>
+
+        <!-- Step 3: Timeline & Preferences -->
+        <div class="onboard-step" data-step="3">
+            <div class="step-header">
+                <span class="step-number">03</span>
+                <h2>Timeline &amp; preferences</h2>
+                <p>Help Aptigenic calibrate its recommendations to your reality.</p>
+            </div>
+
+            <label class="onboard-label">How much time do you have for this transition?</label>
+            <div class="option-chips" id="timeline-chips">
+                <button class="chip {% if user.timeline == '1-3 months (urgent)' %}selected{% endif %}" data-value="1-3 months (urgent)">1–3 months</button>
+                <button class="chip {% if user.timeline == '3-6 months' %}selected{% endif %}" data-value="3-6 months">3–6 months</button>
+                <button class="chip {% if user.timeline == '6-12 months' %}selected{% endif %}" data-value="6-12 months">6–12 months</button>
+                <button class="chip {% if user.timeline == '1-2 years (long game)' %}selected{% endif %}" data-value="1-2 years (long game)">1–2 years</button>
+                <button class="chip {% if user.timeline == 'Just exploring' %}selected{% endif %}" data-value="Just exploring">Just exploring</button>
+            </div>
+
+            <label class="onboard-label" style="margin-top: 28px;">Preferred work style?</label>
+            <div class="option-chips" id="work-chips">
+                <button class="chip {% if user.work_preference == 'Remote' %}selected{% endif %}" data-value="Remote">Remote</button>
+                <button class="chip {% if user.work_preference == 'Hybrid' %}selected{% endif %}" data-value="Hybrid">Hybrid</button>
+                <button class="chip {% if user.work_preference == 'In-person' %}selected{% endif %}" data-value="In-person">In-person</button>
+                <button class="chip {% if user.work_preference == 'No preference' %}selected{% endif %}" data-value="No preference">No preference</button>
+            </div>
+
+            <label class="onboard-label" style="margin-top: 28px;">Education level</label>
+            <div class="option-chips" id="education-chips">
+                <button class="chip {% if user.education == 'High school' %}selected{% endif %}" data-value="High school">High school</button>
+                <button class="chip {% if user.education == 'Some college' %}selected{% endif %}" data-value="Some college">Some college</button>
+                <button class="chip {% if user.education == "Bachelor's degree" %}selected{% endif %}" data-value="Bachelor's degree">Bachelor's</button>
+                <button class="chip {% if user.education == "Master's degree" %}selected{% endif %}" data-value="Master's degree">Master's</button>
+                <button class="chip {% if user.education == 'PhD' %}selected{% endif %}" data-value="PhD">PhD</button>
+                <button class="chip {% if user.education == 'Bootcamp / Self-taught' %}selected{% endif %}" data-value="Bootcamp / Self-taught">Bootcamp / Self-taught</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Confirm -->
+        <div class="onboard-step" data-step="4">
+            <div class="step-header">
+                <span class="step-number">04</span>
+                <h2>Ready to build your career map</h2>
+                <p>Aptigenic will analyze your profile and generate personalized career paths, skill gaps, and a weekly action plan.</p>
+            </div>
+            <div class="confirm-summary" id="confirm-summary"></div>
+        </div>
+
+        <div class="onboard-nav">
+            <button id="prev-btn" class="btn-secondary" style="visibility: hidden;">&#8592; Back</button>
+            <button id="next-btn" class="btn-primary">Continue &#8594;</button>
+        </div>
+    </main>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3>Analyzing your career profile...</h3>
+            <p class="loading-sub" id="loading-sub">Building your personalized career map</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='darkmode.js') }}"></script>
+    <script src="{{ url_for('static', filename='onboard.js') }}"></script>
+</body>
+</html>

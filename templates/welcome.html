@@ -3,26 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Erran</title>
+    <title>Aptigenic — Elevate Your Potential</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-    <a href="{{ url_for('welcome') }}" class="logo">Erran</a>
-    <div class="toggle-container">
-        <label class="switch">
-            <input type="checkbox" id="dark-mode-toggle">
-            <span class="slider round"></span>
-        </label>
-    </div>
-    <div class="container">
-        <h1>Welcome to Erran</h1>
-        <h2>Your AI Career Advisor</h2>
-        <div class="button-container">
-            <form action="{{ url_for('home') }}">
-                <button type="submit">Chat with Erran</button>
-            </form>
+<body class="welcome-page">
+    <nav>
+        <a href="{{ url_for('welcome') }}" class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Aptigenic" class="logo-img">
+        </a>
+        <div class="nav-right">
+            <a href="{{ url_for('onboard') }}" class="nav-btn">Get Started</a>
+            <a href="{{ url_for('chat') }}" class="nav-btn nav-btn-outline">Chat</a>
+            <label class="theme-toggle" title="Toggle dark mode">
+                <input type="checkbox" id="dark-mode-toggle">
+                <span class="toggle-track">
+                    <span class="toggle-sun">&#9788;</span>
+                    <span class="toggle-moon">&#9790;</span>
+                    <span class="toggle-thumb"></span>
+                </span>
+            </label>
         </div>
-    </div>
+    </nav>
+
+    <main class="hero">
+        <div class="hero-content">
+            <p class="hero-badge">AI Career Operating System</p>
+            <h1>Stop guessing.<br>Start <span class="gradient-text">navigating.</span></h1>
+            <p class="hero-subtitle">
+                Aptigenic analyzes your background, maps career paths with real timelines and salaries,
+                identifies your skill gaps, and builds a personalized weekly action plan.
+                Not a chatbot — a career strategist.
+            </p>
+            <a href="{{ url_for('onboard') }}" class="cta-button">
+                Build your career map
+                <span class="cta-arrow">&rarr;</span>
+            </a>
+        </div>
+    </main>
+
+    <section class="features">
+        <div class="feature-card">
+            <div class="feature-icon">&#127915;</div>
+            <h3>Career Path Mapping</h3>
+            <p>See 3–5 paths from where you are to where you want to be, with match scores, timelines, and salary ranges.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128200;</div>
+            <h3>Skill Gap Engine</h3>
+            <p>Know exactly which skills to build, ranked by career impact. No guesswork, no generic lists.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#9989;</div>
+            <h3>Weekly Action Plan</h3>
+            <p>Get specific tasks — not "network more", but "message this type of person with this context, today."</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">&#128172;</div>
+            <h3>Context-Aware Copilot</h3>
+            <p>Chat with an AI that knows your resume, goals, and progress. Every answer is personalized.</p>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <h2>How it works</h2>
+        <div class="steps-row">
+            <div class="how-step">
+                <div class="how-number">1</div>
+                <h4>Share your background</h4>
+                <p>Upload your resume and tell us your goals. Takes 3 minutes.</p>
+            </div>
+            <div class="how-arrow">&rarr;</div>
+            <div class="how-step">
+                <div class="how-number">2</div>
+                <h4>Get your career map</h4>
+                <p>AI analyzes your profile and generates personalized paths, gaps, and actions.</p>
+            </div>
+            <div class="how-arrow">&rarr;</div>
+            <div class="how-step">
+                <div class="how-number">3</div>
+                <h4>Execute weekly</h4>
+                <p>Follow your action plan, track progress, and chat with Aptigenic for deeper guidance.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>Aptigenic — Elevate your potential.</p>
+    </footer>
+
     <script src="{{ url_for('static', filename='darkmode.js') }}"></script>
 </body>
 </html>

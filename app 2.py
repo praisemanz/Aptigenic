@@ -1,7 +1,10 @@
 from flask import Flask, request, render_template
 from openai import OpenAI, RateLimitError
+from dotenv import load_dotenv
 import os
 import time
+
+load_dotenv()
 
 app = Flask(__name__)
 client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
@@ -24,7 +27,8 @@ def chatbot_response():
                 {"role": "user", "content": user_input}
             ],
         )
-        message = response.choices[0].message.content.strip()
+        content = response.choices[0].message.content
+        message = content.strip() if content else "No response received."
         return message
     except RateLimitError:
         time.sleep(1)  # Wait for 1 second before retrying 

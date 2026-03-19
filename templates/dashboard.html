@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Aptigenic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="dashboard-page">
+    <nav>
+        <a href="{{ url_for('welcome') }}" class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Aptigenic" class="logo-img">
+        </a>
+        <div class="nav-right">
+            <a href="{{ url_for('welcome') }}" class="nav-btn nav-btn-outline">&#127968; Home</a>
+            <a href="{{ url_for('chat') }}" class="nav-btn">&#128172; Chat</a>
+            <a href="{{ url_for('profile') }}" class="nav-btn nav-btn-outline">&#9998; Edit Profile</a>
+            <button id="reanalyze-btn" class="nav-btn nav-btn-outline" title="Re-run career analysis">&#10227; Re-analyze</button>
+            <label class="theme-toggle" title="Toggle dark mode">
+                <input type="checkbox" id="dark-mode-toggle">
+                <span class="toggle-track">
+                    <span class="toggle-sun">&#9788;</span>
+                    <span class="toggle-moon">&#9790;</span>
+                    <span class="toggle-thumb"></span>
+                </span>
+            </label>
+        </div>
+    </nav>
+
+    <main class="dash-main">
+        {% if analysis %}
+
+        <section class="dash-section">
+            <div class="dash-summary-card">
+                <h1>Your Career Dashboard</h1>
+                <p class="summary-text">{{ analysis.summary }}</p>
+                <div class="summary-meta">
+                    {% if user.target_role %}<span class="meta-tag">&#127919; {{ user.target_role }}</span>{% endif %}
+                    {% if user.timeline %}<span class="meta-tag">&#9200; {{ user.timeline }}</span>{% endif %}
+                    {% if user.work_preference %}<span class="meta-tag">&#127968; {{ user.work_preference }}</span>{% endif %}
+                </div>
+            </div>
+        </section>
+
+        {% if analysis.market_insight %}
+        <section class="dash-section">
+            <div class="insight-banner">
+                <span class="insight-icon">&#128200;</span>
+                <div>
+                    <strong>Market Insight</strong>
+                    <p>{{ analysis.market_insight }}</p>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="dash-section">
+            <h2 class="section-title">Career Paths</h2>
+            <p class="section-sub">Ranked by fit. Click any path to discuss it with Aptigenic.</p>
+            <div class="paths-grid">
+                {% for path in analysis.career_paths %}
+                <div class="path-card" data-title="{{ path.title }}">
+                    <div class="path-header">
+                        <h3>{{ path.title }}</h3>
+                        <div class="match-badge {% if path.match_score >= 80 %}match-high{% elif path.match_score >= 60 %}match-mid{% else %}match-low{% endif %}">
+                            {{ path.match_score }}% match
+                        </div>
+                    </div>
+                    <p class="path-desc">{{ path.description }}</p>
+                    <div class="path-meta">
+                        <span>&#9200; {{ path.timeline }}</span>
+                        <span>&#128176; {{ path.salary_range }}</span>
+                        <span class="risk-{{ path.risk_level }}">&#9888; {{ path.risk_level }} risk</span>
+                    </div>
+                    <div class="path-steps">
+                        {% for step in path.key_steps %}
+                        <div class="path-step"><span class="step-dot"></span>{{ step }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="dash-section">
+            <h2 class="section-title">Skill Gap Analysis</h2>
+            <p class="section-sub">What to learn, ordered by impact on your career goals.</p>
+            <div class="skills-grid">
+                {% if analysis.current_skills %}
+                <div class="skills-card">
+                    <h4>Your Current Skills</h4>
+                    <div class="skill-tags">
+                        {% for skill in analysis.current_skills %}
+                        <span class="skill-tag existing">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                <div class="skills-card">
+                    <h4>Gaps to Close</h4>
+                    <div class="gap-list">
+                        {% for gap in analysis.skill_gaps %}
+                        <div class="gap-item">
+                            <div class="gap-header">
+                                <span class="gap-name">{{ gap.skill }}</span>
+                                <span class="gap-importance importance-{{ gap.importance }}">{{ gap.importance }}</span>
+                            </div>
+                            <div class="gap-bar-track">
+                                <div class="gap-bar-fill" style="width: {% if gap.current_level == 'none' %}5{% elif gap.current_level == 'beginner' %}25{% elif gap.current_level == 'intermediate' %}55{% else %}80{% endif %}%"></div>
+                            </div>
+                            <p class="gap-action">{{ gap.action }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="dash-section">
+            <div class="section-header-row">
+                <div>
+                    <h2 class="section-title">This Week's Actions</h2>
+                    <p class="section-sub">Complete these to move toward your goals. Check them off as you go.</p>
+                </div>
+                <button id="refresh-actions-btn" class="btn-secondary btn-sm">&#10227; Generate next week</button>
+            </div>
+            <div class="actions-list" id="actions-list">
+                {% for action in actions %}
+                <div class="action-item {% if action.completed %}completed{% endif %}" data-id="{{ action.id }}">
+                    <button class="action-check" onclick="toggleAction({{ action.id }})">
+                        {% if action.completed %}&#10003;{% endif %}
+                    </button>
+                    <div class="action-content">
+                        <span class="action-category cat-{{ action.category }}">{{ action.category }}</span>
+                        <h4>{{ action.title }}</h4>
+                        <p>{{ action.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% else %}
+        <section class="dash-section" style="text-align: center; padding: 80px 20px;">
+            <div class="loading-spinner"></div>
+            <h2 style="margin-top: 20px;">Generating your career analysis...</h2>
+            <p style="color: var(--text-muted);">This may take a moment.</p>
+        </section>
+        {% endif %}
+    </main>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h3>Re-analyzing your profile...</h3>
+            <p class="loading-sub">Updating career paths and action plan</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='darkmode.js') }}"></script>
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>

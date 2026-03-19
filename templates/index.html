@@ -3,24 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat with Erran</title>
+    <title>Chat — Aptigenic</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-<body>
-    <a href="{{ url_for('welcome') }}" class="logo">Erran</a>
-    <div class="toggle-container">
-        <label class="switch">
-            <input type="checkbox" id="dark-mode-toggle">
-            <span class="slider round"></span>
-        </label>
-    </div>
-    <div class="container">
-        <div id="chat-box"></div>
-        <div class="input-container">
-            <input type="text" id="user-input" placeholder="Type a message..." onkeydown="if (event.key === 'Enter') sendMessage()">
-            <button onclick="sendMessage()">Send</button>
+<body class="chat-page">
+    <nav>
+        <a href="{{ url_for('welcome') }}" class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Aptigenic" class="logo-img">
+        </a>
+        <div class="nav-right">
+            <a href="{{ url_for('welcome') }}" class="nav-btn nav-btn-outline">&#127968; Home</a>
+            {% if user and user.onboarded %}
+            <a href="{{ url_for('dashboard') }}" class="nav-btn nav-btn-outline">&#128202; Dashboard</a>
+            <a href="{{ url_for('profile') }}" class="nav-btn nav-btn-outline">&#9998; Profile</a>
+            {% endif %}
+            <button id="export-btn" class="nav-btn" title="Export conversation">&#128190; Export</button>
+            <label class="theme-toggle" title="Toggle dark mode">
+                <input type="checkbox" id="dark-mode-toggle">
+                <span class="toggle-track">
+                    <span class="toggle-sun">&#9788;</span>
+                    <span class="toggle-moon">&#9790;</span>
+                    <span class="toggle-thumb"></span>
+                </span>
+            </label>
         </div>
+    </nav>
+
+    <div class="chat-layout">
+        <!-- Sidebar: Chat History -->
+        <aside class="chat-sidebar" id="chat-sidebar">
+            <div class="sidebar-header">
+                <h3>Chats</h3>
+                <button id="new-chat-btn" class="sidebar-new-btn" title="New chat">+ New</button>
+            </div>
+            <div class="sidebar-list" id="sidebar-list">
+                {% for s in sessions %}
+                <div class="sidebar-item {% if s.id == active_session.id %}active{% endif %}" data-id="{{ s.id }}">
+                    <span class="sidebar-item-title">{{ s.title }}</span>
+                    <button class="sidebar-item-delete" data-id="{{ s.id }}" title="Delete">&times;</button>
+                </div>
+                {% endfor %}
+            </div>
+        </aside>
+
+        <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle chat history">&#9664;</button>
+
+        <main class="chat-container">
+            {% if user and user.onboarded and user.target_role %}
+            <div class="chat-context-bar">
+                <span>&#127919; {{ user.target_role }}</span>
+                {% if user.timeline %}<span>&#9200; {{ user.timeline }}</span>{% endif %}
+                <span class="context-hint">Aptigenic has your full profile context</span>
+            </div>
+            {% endif %}
+
+            <div id="chat-box">
+                {% if history %}
+                    {% for msg in history %}
+                    <div class="message-row {{ 'user' if msg.role == 'user' else 'bot' }}">
+                        <div class="avatar {{ 'user-avatar' if msg.role == 'user' else 'bot-avatar' }}">{{ 'Y' if msg.role == 'user' else 'A' }}</div>
+                        <div class="bubble {{ 'user-bubble' if msg.role == 'user' else 'bot-bubble' }}">
+                            {% if msg.role == 'user' %}{{ msg.content }}{% else %}{{ msg.content }}{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-icon">&#128075;</div>
+                    <h2>Hey — I'm Aptigenic.</h2>
+                    {% if user and user.onboarded %}
+                    <p>I have your profile loaded. Ask me anything about your career transition, or try one of these:</p>
+                    <div class="suggested-prompts">
+                        <button class="prompt-chip" data-prompt="What's the fastest path to my target role given my current skills?">Fastest path to my goal</button>
+                        <button class="prompt-chip" data-prompt="Can you help me write a resume tailored for my target role?">Help with my resume</button>
+                        <button class="prompt-chip" data-prompt="What should I focus on this week to make the most career progress?">What to do this week</button>
+                        <button class="prompt-chip" data-prompt="Run me through a mock interview for my target role.">Mock interview</button>
+                    </div>
+                    {% else %}
+                    <p>Your AI career strategist. I can help more with a full profile.</p>
+                    <div class="suggested-prompts">
+                        <button class="prompt-chip" data-prompt="I'm thinking about switching careers but I'm not sure where to start.">I want to switch careers</button>
+                        <button class="prompt-chip" data-prompt="I just graduated and I'm trying to figure out what career path to pursue.">I just graduated</button>
+                        <a href="{{ url_for('onboard') }}" class="prompt-chip" style="text-decoration:none;">&#10148; Complete my profile for personalized advice</a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="input-bar">
+                <div class="input-wrapper">
+                    <textarea id="user-input" placeholder="Ask Aptigenic anything about your career..." rows="1" maxlength="2000"></textarea>
+                    <button id="send-btn" onclick="sendMessage()" title="Send message">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+                <p class="input-hint">Aptigenic knows your profile, goals, and conversation history.</p>
+            </div>
+        </main>
     </div>
+
+    <script>
+        const ACTIVE_SESSION_ID = {{ active_session.id if active_session else 'null' }};
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="{{ url_for('static', filename='darkmode.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>

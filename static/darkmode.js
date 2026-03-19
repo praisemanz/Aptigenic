@@ -1,19 +1,17 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const toggleSwitch = document.getElementById('dark-mode-toggle');
-    const currentTheme = localStorage.getItem('theme') || 'light';
+    const toggle = document.getElementById('dark-mode-toggle');
+    const saved = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-    if (currentTheme === 'dark') {
+    if (saved === 'dark' || (!saved && prefersDark)) {
         document.body.classList.add('dark-mode');
-        toggleSwitch.checked = true;
+        if (toggle) toggle.checked = true;
     }
 
-    toggleSwitch.addEventListener('change', function (e) {
-        if (e.target.checked) {
-            document.body.classList.add('dark-mode');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.body.classList.remove('dark-mode');
-            localStorage.setItem('theme', 'light');
-        }
-    });
+    if (toggle) {
+        toggle.addEventListener('change', function () {
+            document.body.classList.toggle('dark-mode', this.checked);
+            localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+        });
+    }
 });
