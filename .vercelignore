@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.db
+.env
+.git/
+aptigenic logo.png
+app 2.py
+get-pip.py
+static/darkmode 2.js
+static/scripts 2.js
+static/styles 2.css
+templates/index 2.html
+templates/welcome 2.html
+templates/welcome.css
+templates/welcome 2.css

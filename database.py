@@ -3,7 +3,11 @@ import json
 import os
 from datetime import datetime
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'aptigenic.db')
+IS_VERCEL = os.environ.get('VERCEL', '') == '1'
+if IS_VERCEL:
+    DB_PATH = '/tmp/aptigenic.db'
+else:
+    DB_PATH = os.path.join(os.path.dirname(__file__), 'aptigenic.db')
 
 
 def get_db():
