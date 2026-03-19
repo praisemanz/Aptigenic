@@ -11,12 +11,22 @@ import database as db
 
 load_dotenv()
 
-app = Flask(__name__)
+APP_ROOT = os.environ.get('APP_ROOT', os.path.dirname(os.path.abspath(__file__)))
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(APP_ROOT, 'templates'),
+    static_folder=os.path.join(APP_ROOT, 'static'),
+)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', uuid.uuid4().hex)
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10 MB upload limit
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
+
 client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
-db.init_db()
+try:
+    db.init_db()
+except Exception:
+    pass
 
 
 def get_user_id():
@@ -47,18 +57,21 @@ def extract_text_from_file(file_storage):
     filename = file_storage.filename or ''
     ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
 
-    if ext == 'pdf':
-        from PyPDF2 import PdfReader
-        reader = PdfReader(io.BytesIO(file_storage.read()))
-        return "\n".join(page.extract_text() or '' for page in reader.pages).strip()
+    try:
+        if ext == 'pdf':
+            from PyPDF2 import PdfReader
+            reader = PdfReader(io.BytesIO(file_storage.read()))
+            return "\n".join(page.extract_text() or '' for page in reader.pages).strip()
 
-    elif ext in ('docx', 'doc'):
-        from docx import Document
-        doc = Document(io.BytesIO(file_storage.read()))
-        return "\n".join(p.text for p in doc.paragraphs).strip()
+        elif ext in ('docx', 'doc'):
+            from docx import Document
+            doc = Document(io.BytesIO(file_storage.read()))
+            return "\n".join(p.text for p in doc.paragraphs).strip()
 
-    elif ext == 'txt':
-        return file_storage.read().decode('utf-8', errors='ignore').strip()
+        elif ext == 'txt':
+            return file_storage.read().decode('utf-8', errors='ignore').strip()
+    except ImportError:
+        return ''
 
     return ''
 
