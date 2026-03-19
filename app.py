@@ -21,7 +21,7 @@ app = Flask(
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', uuid.uuid4().hex)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 
-client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY', 'placeholder'))
 
 try:
     db.init_db()
